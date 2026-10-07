@@ -1,13 +1,13 @@
 require "faraday"
 
 require_relative "buildkite/version"
+require_relative "buildkite/error"
 
 module Buildkite
 
   autoload :Configuration, "buildkite/configuration"
   autoload :Client, "buildkite/client"
   autoload :Collection, "buildkite/collection"
-  autoload :Error, "buildkite/error"
   autoload :Object, "buildkite/object"
 
   class << self

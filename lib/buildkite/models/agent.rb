@@ -3,9 +3,8 @@ module Buildkite
 
     class << self
 
-      def list(org: Buildkite.config.org)
-        response = Client.get_request("organizations/#{org}/agents")
-        Collection.from_response(response, type: Agent)
+      def list(org: Buildkite.config.org, **params)
+        Collection.from_request("organizations/#{org}/agents", type: Agent, params: params)
       end
 
       def retrieve(org: Buildkite.config.org, id:)

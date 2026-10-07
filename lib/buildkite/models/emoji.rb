@@ -3,9 +3,8 @@ module Buildkite
 
     class << self
 
-      def list(org: Buildkite.config.org)
-        response = Client.get_request("organizations/#{org}/emojis")
-        Collection.from_response(response, type: Emoji)
+      def list(org: Buildkite.config.org, **params)
+        Collection.from_request("organizations/#{org}/emojis", type: Emoji, params: params)
       end
 
     end

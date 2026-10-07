@@ -3,9 +3,8 @@ module Buildkite
 
     class << self
 
-      def list
-        response = Client.get_request("organizations")
-        Collection.from_response(response, type: Organization)
+      def list(**params)
+        Collection.from_request("organizations", type: Organization, params: params)
       end
 
       def retrieve(slug:)

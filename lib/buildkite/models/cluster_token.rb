@@ -3,9 +3,8 @@ module Buildkite
 
     class << self
 
-      def list(org: Buildkite.config.org, cluster:)
-        response = Client.get_request("organizations/#{org}/clusters/#{cluster}/tokens")
-        Collection.from_response(response, type: ClusterToken)
+      def list(org: Buildkite.config.org, cluster:, **params)
+        Collection.from_request("organizations/#{org}/clusters/#{cluster}/tokens", type: ClusterToken, params: params)
       end
 
       def retrieve(org: Buildkite.config.org, cluster:, id:)

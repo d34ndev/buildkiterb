@@ -31,6 +31,80 @@ end
 
 ```
 
+Other settings are optional:
+
+```ruby
+Buildkite.configure do |config|
+  config.timeout        = 30 # seconds to wait for a response
+  config.open_timeout   = 10 # seconds to wait for the connection to open
+  config.max_retries    = 2  # times to retry a rate limited request, 0 to disable
+  config.max_retry_wait = 60 # raise instead of waiting longer than this many seconds
+end
+```
+
+### Pagination and filtering
+
+Buildkite returns 30 results per page (100 at most). Every `list` method returns a `Buildkite::Collection`,
+which is `Enumerable` over the items on that page. Pass any filters the API supports, including `page` and `per_page`.
+
+```ruby
+builds = Buildkite::Build.list(org: "org-slug", branch: "main", state: "failed", per_page: 100)
+builds.each { |build| puts build.number }
+
+# Fetch the next page
+builds.next_page? #=> true
+builds.next_page  #=> Buildkite::Collection or nil on the last page
+
+# Lazily walk every page, only fetching the pages you use
+Buildkite::Build.list(per_page: 100).auto_paginate.first(250)
+Buildkite::Pipeline.list.auto_paginate.map(&:slug)
+
+# Or page by page
+Buildkite::Build.list.each_page { |page| puts page.total }
+```
+
+`total` is the number of items on the page, as Buildkite doesn't report an overall total.
+
+### Responses
+
+Responses are `Buildkite::Object`s. Read attributes with dot notation or like a hash. Missing attributes are `nil`.
+
+```ruby
+build = Buildkite::Build.retrieve(pipeline: "pipeline-slug", number: 123)
+build.state
+build[:state]
+build["creator"]["name"]
+build.creator.name
+build.to_h
+```
+
+### Errors
+
+Every error is a `Buildkite::Error`, so `rescue Buildkite::Error` catches them all. It has `status`, `body`
+and `response`. API errors are one of the subclasses below.
+
+| Status | Error |
+| --- | --- |
+| 400 | `Buildkite::BadRequestError` |
+| 401 | `Buildkite::AuthenticationError` |
+| 403 | `Buildkite::ForbiddenError` |
+| 404 | `Buildkite::NotFoundError` |
+| 409 | `Buildkite::ConflictError` |
+| 422 | `Buildkite::UnprocessableEntityError` |
+| 429 | `Buildkite::RateLimitError` (after retries are used up) |
+| 5xx | `Buildkite::ServerError` |
+
+Timeouts and connection failures raise `Buildkite::ConnectionError`.
+
+```ruby
+begin
+  Buildkite::Build.retrieve(pipeline: "pipeline-slug", number: 999)
+rescue Buildkite::NotFoundError => e
+  e.status #=> 404
+  e.body   #=> {"message" => "No build found"}
+end
+```
+
 ### Access Token
 
 ```ruby
@@ -45,7 +119,7 @@ Buildkite::AccessToken.revoke
 
 ```ruby
 # Retrieves an organization
-Buildkite::Organization.get slug: "my-org-slug"
+Buildkite::Organization.retrieve slug: "my-org-slug"
 ```
 
 ### Pipelines
@@ -84,8 +158,11 @@ Buildkite::Pipeline.webhook pipeline: "my-pipeline"
 ### Builds
 
 ```ruby
-# List all builds
+# List all builds across every organization your token can see
 Buildkite::Build.list
+
+# Filter builds
+Buildkite::Build.list org: "org-slug", branch: "main", state: "passed"
 
 # List all builds for an org
 Buildkite::Build.list org: "org-slug"
@@ -248,7 +325,7 @@ Buildkite::User.retrieve
 
 ## Contributing
 
-Bug reports and pull requests are welcome on GitHub at https://github.com/deanpcmad/buildkiterb.
+Bug reports and pull requests are welcome on GitHub at https://github.com/d34ndev/buildkiterb.
 
 ## License
 

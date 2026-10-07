@@ -3,18 +3,18 @@ module Buildkite
 
     class << self
 
-      def list(org: nil, pipeline: nil)
-        if org && pipeline
-          response = Client.get_request("organizations/#{org}/pipelines/#{pipeline}/builds")
+      # With no org this lists builds across every organization the token can see. Pass
+      # filters such as branch:, state:, creator: or created_from: as keyword arguments.
+      def list(org: nil, pipeline: nil, **params)
+        path = if org && pipeline
+          "organizations/#{org}/pipelines/#{pipeline}/builds"
         elsif org
-          response = Client.get_request("organizations/#{org}/builds")
+          "organizations/#{org}/builds"
         else
-          response = Client.get_request("builds")
+          "builds"
         end
 
-        if response
-          Collection.from_response(response, type: Build)
-        end
+        Collection.from_request(path, type: Build, params: params)
       end
 
       def retrieve(org: Buildkite.config.org, pipeline: Buildkite.config.pipeline, number:)

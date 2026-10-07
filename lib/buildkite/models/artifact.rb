@@ -3,14 +3,11 @@ module Buildkite
 
     class << self
 
-      def list(org: Buildkite.config.org, pipeline: Buildkite.config.pipeline, build:, job: nil)
-        if job
-          response = Client.get_request("organizations/#{org}/pipelines/#{pipeline}/builds/#{build}/jobs/#{job}/artifacts")
-        else
-          response = Client.get_request("organizations/#{org}/pipelines/#{pipeline}/builds/#{build}/artifacts")
-        end
+      def list(org: Buildkite.config.org, pipeline: Buildkite.config.pipeline, build:, job: nil, **params)
+        path = "organizations/#{org}/pipelines/#{pipeline}/builds/#{build}"
+        path += "/jobs/#{job}" if job
 
-        Collection.from_response(response, type: Artifact)
+        Collection.from_request("#{path}/artifacts", type: Artifact, params: params)
       end
 
       def retrieve(org: Buildkite.config.org, pipeline: Buildkite.config.pipeline, build:, job:, id:)
