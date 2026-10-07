@@ -36,6 +36,10 @@ All notable changes to `buildkiterb` are documented in this file.
 - A token set or changed after the first request is now used. It was captured when the first request was made.
 - `delete` requests passed their headers as query params.
 - The error message for a non-JSON error body (such as an HTML 502 page) no longer risks raising `NoMethodError`.
+- `ClusterQueue.pause` now sends the note as `dispatch_paused_note`, which is what the API reads. It was sent as `note`
+  and ignored.
+- `Cluster.update`, `ClusterQueue.update` and `ClusterToken.update` now use `PUT`, as documented, instead of `PATCH`.
+- `Artifact.download` falls back to the `Location` header if the response body has no URL.
 - The README example for retrieving an organization used `get` instead of `retrieve`.
 
 ### Changed

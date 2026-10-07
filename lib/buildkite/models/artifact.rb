@@ -17,7 +17,12 @@ module Buildkite
 
       def download(org: Buildkite.config.org, pipeline: Buildkite.config.pipeline, build:, job:, id:)
         response = Client.get_request("organizations/#{org}/pipelines/#{pipeline}/builds/#{build}/jobs/#{job}/artifacts/#{id}/download")
-        ArtifactDownload.new response.body
+
+        # Buildkite answers with a 302 and the URL in both the body and the Location header
+        body = response.body
+        body = {"url" => response.headers["Location"]} unless body.is_a?(Hash) && body["url"]
+
+        ArtifactDownload.new body
       end
 
       def delete(org: Buildkite.config.org, pipeline: Buildkite.config.pipeline, build:, job:, id:)

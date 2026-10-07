@@ -1,7 +1,7 @@
 ---
 http_interactions:
 - request:
-    method: patch
+    method: put
     uri: https://api.buildkite.com/v2/organizations/dean-test/clusters/d346006f-74d3-4497-8a64-543ec5fefcc1/queues/828f06ff-bb08-4258-8083-b6c65c7e2b29
     body:
       encoding: UTF-8

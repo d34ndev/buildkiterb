@@ -19,7 +19,7 @@ module Buildkite
       end
 
       def update(org: Buildkite.config.org, cluster:, id:, **args)
-        response = Client.patch_request("organizations/#{org}/clusters/#{cluster}/tokens/#{id}", body: args)
+        response = Client.put_request("organizations/#{org}/clusters/#{cluster}/tokens/#{id}", body: args)
         ClusterToken.new response.body
       end
 

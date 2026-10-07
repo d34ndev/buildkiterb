@@ -19,12 +19,12 @@ module Buildkite
       end
 
       def update(org: Buildkite.config.org, cluster:, id:, **args)
-        response = Client.patch_request("organizations/#{org}/clusters/#{cluster}/queues/#{id}", body: args)
+        response = Client.put_request("organizations/#{org}/clusters/#{cluster}/queues/#{id}", body: args)
         ClusterQueue.new response.body
       end
 
       def pause(org: Buildkite.config.org, cluster:, id:, note: nil)
-        response = Client.post_request("organizations/#{org}/clusters/#{cluster}/queues/#{id}/pause_dispatch", body: {note: note})
+        response = Client.post_request("organizations/#{org}/clusters/#{cluster}/queues/#{id}/pause_dispatch", body: {dispatch_paused_note: note})
         ClusterQueue.new response.body
       end
 
